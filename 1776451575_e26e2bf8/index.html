@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Carmine Schettino | Video Editor</title>
+  <meta name="description" content="Professional video editor creating engaging learning videos for parents and children.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --primary: #ff0000;
+      --secondary: #000000;
+      --accent: #ff0000;
+    }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    html {
+      scroll-behavior: smooth;
+    }
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: #0a0a0a;
+      color: #ffffff;
+      overflow-x: hidden;
+      cursor: none;
+    }
+    .cursor {
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--accent);
+      border-radius: 50%;
+      position: fixed;
+      pointer-events: none;
+      z-index: 9999;
+      transition: transform 0.1s ease;
+      mix-blend-mode: difference;
+    }
+    .cursor.hover {
+      transform: scale(2);
+    }
+    .grain {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 9998;
+      opacity: 0.05;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    }
+    .glass {
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .gradient-text {
+      background: linear-gradient(135deg, var(--accent), #ff4d4d);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .gradient-border {
+      position: relative;
+    }
+    .gradient-border::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      padding: 2px;
+      background: linear-gradient(135deg, var(--accent), #ff4d4d);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      border-radius: inherit;
+    }
+    .fade-up {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: all 0.8s ease;
+    }
+    .fade-up.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .parallax {
+      position: relative;
+      overflow: hidden;
+    }
+    .parallax-bg {
+      position: absolute;
+      width: 100%;
+      height: 120%;
+      top: -10%;
+      background: radial-gradient(ellipse at center, rgba(255, 0, 0, 0.15) 0%, transparent 70%);
+    }
+    .service-card {
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .service-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 20px 40px rgba(255, 0, 0, 0.2);
+    }
+    .hero-blob {
+      position: absolute;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(255, 0, 0, 0.3) 0%, transparent 70%);
+      filter: blur(80px);
+      animation: blob-float 8s ease-in-out infinite;
+    }
+    @keyframes blob-float {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(30px, -30px) scale(1.1); }
+    }
+    .fade-in {
+      animation: fade-in 1s ease forwards;
+    }
+    @keyframes fade-in {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .slide-in {
+      animation: slide-in 0.8s ease forwards;
+    }
+    @keyframes slide-in {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .process-step {
+      position: relative;
+    }
+    .process-line {
+      position: absolute;
+      left: 24px;
+      top: 60px;
+      bottom: -40px;
+      width: 2px;
+      background: linear-gradient(to bottom, var(--accent), transparent);
+    }
+  </style>
+</head>
+<body>
+  <div class="cursor hidden md:block"></div>
+  <div class="grain"></div>
+
+  <!-- Navigation -->
+  <nav class="fixed top-0 left-0 right-0 z-50 glass px-6 py-4">
+    <div class="max-w-6xl mx-auto flex justify-between items-center">
+      <div class="text-xl font-bold font-space tracking-tight">
+        <span class="gradient-text">Carmine</span>
+      </div>
+      <div class="hidden md:flex gap-8">
+        <a href="#about" class="hover:text-red-500 transition-colors">About</a>
+        <a href="#services" class="hover:text-red-500 transition-colors">Services</a>
+        <a href="#process" class="hover:text-red-500 transition-colors">Process</a>
+        <a href="#faq" class="hover:text-red-500 transition-colors">FAQ</a>
+      </div>
+      <a href="#contact" class="bg-red-600 hover:bg-red-700 px-6 py-2 rounded-full transition-all hover:scale-105">
+        Let's Talk
+      </a>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="min-h-screen flex items-center justify-center relative parallax">
+    <div class="parallax-bg"></div>
+    <div class="hero-blob" style="left: 20%; top: 20%;"></div>
+    <div class="hero-blob" style="right: 20%; bottom: 20%; animation-delay: -4s;"></div>
+    
+    <div class="text-center px-6 relative z-10">
+      <p class="text-red-500 tracking-widest text-sm uppercase mb-4 slide-in" style="animation-delay: 0.2s;">Video Editor</p>
+      <h1 class="text-5xl md:text-7xl font-bold font-space mb-6 slide-in" style="animation-delay: 0.4s;">
+        Creating Learning <br>
+        <span class="gradient-text">Videos That</span> <br>
+        Engage
+      </h1>
+      <p class="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto mb-8 slide-in" style="animation-delay: 0.6s;">
+        I transform ideas into compelling visual stories that captivate parents and children alike.
+      </p>
+      <div class="flex gap-4 justify-center slide-in" style="animation-delay: 0.8s;">
+        <a href="#services" class="gradient-border bg-transparent px-8 py-3 rounded-full hover:bg-red-600/20 transition-all">
+          View Services
+        </a>
+        <a href="#contact" class="bg-red-600 hover:bg-red-700 px-8 py-3 rounded-full transition-all hover:scale-105">
+          Message Me
+        </a>
+      </div>
+    </div>
+    
+    <div class="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce">
+      <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+      </svg>
+    </div>
+  </section>
+
+  <!-- About Section -->
+  <section id="about" class="py-24 px-6">
+    <div class="max-w-6xl mx-auto">
+      <div class="grid md:grid-cols-2 gap-12 items-center">
+        <div class="fade-up">
+          <div class="w-80 h-80 mx-auto glass rounded-3xl flex items-center justify-center">
+            <svg class="w-32 h-32 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="fade-up" style="transition-delay: 0.2s;">
+          <p class="text-red-500 tracking-widest text-sm uppercase mb-4">About Me</p>
+          <h2 class="text-4xl font-bold font-space mb-6">
+            Passionate About <br>
+            <span class="gradient-text">Visual Learning</span>
+          </h2>
+          <p class="text-gray-400 text-lg leading-relaxed mb-6">
+            I'm Carmine Schettino, a video editor focused on creating educational content that makes learning enjoyable for children. I believe that great visuals can transform how kids absorb information.
+          </p>
+          <p class="text-gray-400 text-lg leading-relaxed">
+            My mission is to help parents give their children the best learning experience through engaging, well-crafted educational videos.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Services Section -->
+  <section id="services" class="py-24 px-6 bg-black/30">
+    <div class="max-w-6xl mx-auto">
+      <div class="text-center mb-16 fade-up">
+        <p class="text-red-500 tracking-widest text-sm uppercase mb-4">Services</p>
+        <h2 class="text-4xl md:text-5xl font-bold font-space">
+          What I <span class="gradient-text">Offer</span>
+        </h2>
+      </div>
+      
+      <div class="grid md:grid-cols-3 gap-6">
+        <!-- Service 1 -->
+        <div class="service-card glass rounded-2xl p-8 fade-up" style="transition-delay: 0.1s;">
+          <div class="w-14 h-14 bg-red-600/20 rounded-xl flex items-center justify-center mb-6">
+            <svg class="w-7 h-7 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <h3 class="text-xl font-semibold mb-3">Video Editing</h3>
+          <p class="text-gray-400">
+            Professional editing of your educational content with engaging visuals, smooth transitions, andcaptivating storytelling.
+          </p>
+        </div>
+        
+        <!-- Service 2 -->
+        <div class="service-card glass rounded-2xl p-8 fade-up" style="transition-delay: 0.2s;">
+          <div class="w-14 h-14 bg-red-600/20 rounded-xl flex items-center justify-center mb-6">
+            <svg class="w-7 h-7 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+            </svg>
+          </div>
+          <h3 class="text-xl font-semibold mb-3">Animation</h3>
+          <p class="text-gray-400">
+            Custom animations and motion graphics to make your educational content more engaging and fun for children.
+          </p>
+        </div>
+        
+        <!-- Service 3 -->
+        <div class="service-card glass rounded-2xl p-8 fade-up" style="transition-delay: 0.3s;">
+          <div class="w-14 h-14 bg-red-600/20 rounded-xl flex items-center justify-center mb-6">
+            <svg class="w-7 h-7 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+            </svg>
+          </div>
+          <h3 class="text-xl font-semibold mb-3">Content Strategy</h3>
+          <p class="text-gray-400">
+            Guidance on how to structure your learning videos for maximum engagement and effectiveness.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Why Work With Me -->
+  <section class="py-24 px-6">
+    <div class="max-w-6xl mx-auto">
+      <div class="text-center mb-16 fade-up">
+        <p class="text-red-500 tracking-widest text-sm uppercase mb-4">Why Choose Me</p>
+        <h2 class="text-4xl md:text-5xl font-bold font-space">
+          What Sets Me <span class="gradient-text">Apart</span>
+        </h2>
+      </div>
+      
+      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="glass rounded-2xl p-6 text-center fade-up" style="transition-delay: 0.1s;">
+          <div class="text-4xl mb-4">🎯</div>
+          <h3 class="font-semibold mb-2">Child-Focused</h3>
+          <p class="text-gray-400 text-sm">Content designed specifically for young learners</p>
+        </div>
+        
+        <div class="glass rounded-2xl p-6 text-center fade-up" style="transition-delay: 0.2s;">
+          <div class="text-4xl mb-4">✨</div>
+          <h3 class="font-semibold mb-2">Premium Quality</h3>
+          <p class="text-gray-400 text-sm">High-end production values</p>
+        </div>
+        
+        <div class="glass rounded-2xl p-6 text-center fade-up" style="transition-delay: 0.3s;">
+          <div class="text-4xl mb-4">🚀</div>
+          <h3 class="font-semibold mb-2">Fast Delivery</h3>
+          <p class="text-gray-400 text-sm">Quick turnaround times</p>
+        </div>
+        
+        <div class="glass rounded-2xl p-6 text-center fade-up" style="transition-delay: 0.4s;">
+          <div class="text-4xl mb-4">💬</div>
+          <h3 class="font-semibold mb-2">Open Communication</h3>
+          <p class="text-gray-400 text-sm">Always available to chat</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Process Section -->
+  <section id="process" class="py-24 px-6 bg-black/30">
+    <div class="max-w-4xl mx-auto">
+      <div class="text-center mb-16 fade-up">
+        <p class="text-red-500 tracking-widest text-sm uppercase mb-4">Process</p>
+        <h2 class="text-4xl md:text-5xl font-bold font-space">
+          How It <span class="gradient-text">Works</span>
+        </h2>
+      </div>
+      
+      <div class="space-y-8">
+        <div class="process-step fade-up">
+          <div class="flex gap-6">
+            <div class="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center text-white font-bold shrink-0">1</div>
+            <div class="glass rounded-2xl p-6 flex-1">
+              <h3 class="text-xl font-semibold mb-2">Share Your Vision</h3>
+              <p class="text-gray-400">Tell me about your idea, target audience, and goals for the video.</p>
+            </div>
+          </div>
+          <div class="process-line"></div>
+        </div>
+        
+        <div class="process-step fade-up" style="transition-delay: 0.1s;">
+          <div class="flex gap-6">
+            <div class="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center text-white font-bold shrink-0">2</div>
+            <div class="glass rounded-2xl p-6 flex-1">
+              <h3 class="text-xl font-semibold mb-2">I Create Magic</h3>
+              <p class="text-gray-400">I craft your video with engaging visuals, animations, and seamless editing.</p>
+            </div>
+          </div>
+          <div class="process-line"></div>
+        </div>
+        
+        <div class="process-step fade-up" style="transition-delay: 0.2s;">
+          <div class="flex gap-6">
+            <div class="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center text-white font-bold shrink-0">3</div>
+            <div class="glass rounded-2xl p-6 flex-1">
+              <h3 class="text-xl font-semibold mb-2">Review & Refine</h3>
+              <p class="text-gray-400">You get to review and request any changes until it's perfect.</p>
+            </div>
+          </div>
+          <div class="process-line"></div>
+        </div>
+        
+        <div class="fade-up" style="transition-delay: 0.3s;">
+          <div class="flex gap-6">
+            <div class="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center text-white font-bold shrink-0">4</div>
+            <div class="glass rounded-2xl p-6 flex-1">
+              <h3 class="text-xl font-semibold mb-2">Launch & Shine</h3>
+              <p class="text-gray-400">Your video is ready to captivate young minds!</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Section -->
+  <section id="faq" class="py-24 px-6">
+    <div class="max-w-3xl mx-auto">
+      <div class="text-center mb-16 fade-up">
+        <p class="text-red-500 tracking-widest text-sm uppercase mb-4">FAQ</p>
+        <h2 class="text-4xl md:text-5xl font-bold font-space">
+          Common <span class="gradient-text">Questions</span>
+        </h2>
+      </div>
+      
+      <div class="space-y-4">
+        <div class="glass rounded-2xl p-6 fade-up">
+          <button class="flex justify-between items-center w-full text-left" onclick="this.nextElementSibling.classList.toggle('hidden')">
+            <h3 class="font-semibold">How long does it take?</h3>
+            <svg class="w-5 h-5 text-red-500 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </button>
+          <p class="text-gray-400 mt-4 hidden">Turnaround time depends on the project scope. Simple edits take 2-3 days, while full productions with animation take 1-2 weeks.</p>
+        </div>
+        
+        <div class="glass rounded-2xl p-6 fade-up" style="transition-delay: 0.1s;">
+          <button class="flex justify-between items-center w-full text-left" onclick="this.nextElementSibling.classList.toggle('hidden')">
+            <h3 class="font-semibold">What ages do you create content for?</h3>
+            <svg class="w-5 h-5 text-red-500 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </button>
+          <p class="text-gray-400 mt-4 hidden">I specialize in content for children ages 4-12, but can adapt for older audiences as well.</p>
+        </div>
+        
+        <div class="glass rounded-2xl p-6 fade-up" style="transition-delay: 0.2s;">
+          <button class="flex justify-between items-center w-full text-left" onclick="this.nextElementSibling.classList.toggle('hidden')">
+            <h3 class="font-semibold">Do you provide revisions?</h3>
+            <svg class="w-5 h-5 text-red-500 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </button>
+          <p class="text-gray-400 mt-4 hidden">Yes! I offer up to 2 rounds of revisions to ensure you're completely satisfied.</p>
+        </div>
+        
+        <div class="glass rounded-2xl p-6 fade-up" style="transition-delay: 0.3s;">
+          <button class="flex justify-between items-center w-full text-left" onclick="this.nextElementSibling.classList.toggle('hidden')">
+            <h3 class="font-semibold">How do we get started?</h3>
+            <svg class="w-5 h-5 text-red-500 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </button>
+          <p class="text-gray-400 mt-4 hidden">Simply message me and tell me about your project. I'll get back to you within 24 hours!</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section id="contact" class="py-24 px-6">
+    <div class="max-w-4xl mx-auto text-center glass rounded-3xl p-12 md:p-16 fade-up">
+      <h2 class="text-4xl md:text-5xl font-bold font-space mb-6">
+        Ready to Create Something <span class="gradient-text">Amazing?</span>
+      </h2>
+      <p class="text-gray-400 text-lg mb-8 max-w-xl mx-auto">
+        Let's work together to create engaging educational videos that children love to watch.
+      </p>
+      <a href="mailto:ca.schettino08@icloud.com" class="inline-block bg-gradient-to-r from-red-600 to-red-700 px-10 py-4 rounded-full text-lg font-semibold hover:scale-105 transition-transform">
+        Message Me
+      </a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="py-12 px-6 border-t border-white/10">
+    <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+      <div class="text-xl font-bold font-space">
+        <span class="gradient-text">Carmine</span> Schettino
+      </div>
+      <p class="text-gray-500">© 2026. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script>
+    // Custom Cursor
+    const cursor = document.querySelector('.cursor');
+    document.addEventListener('mousemove', (e) => {
+      cursor.style.left = e.clientX - 10 + 'px';
+      cursor.style.top = e.clientY - 10 + 'px';
+    });
+    
+    // Hover effect for links
+    document.querySelectorAll('a, button').forEach(el => {
+      el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
+      el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
+    });
+    
+    // Scroll Animation
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+    
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, observerOptions);
+    
+    document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+    
+    // FAQ Toggle
+    document.querySelectorAll('#faq button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const svg = btn.querySelector('svg');
+        svg.classList.toggle('rotate-180');
+      });
+    });
+  </script>
+</body>
+</html>
